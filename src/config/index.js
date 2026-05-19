@@ -1,0 +1,30 @@
+require('dotenv').config()
+
+const ESTADOS_FLUXO = {
+  TRIAGEM: 'TRIAGEM',
+  INELEGIVEL: 'INELEGIVEL',
+  AGUARDANDO_PAGAMENTO: 'AGUARDANDO_PAGAMENTO',
+  FILA: 'FILA',
+  EM_ATENDIMENTO: 'EM_ATENDIMENTO',
+  PRONTO_PARA_DECISAO: 'PRONTO_PARA_DECISAO',
+  APROVADO: 'APROVADO',
+  RECUSADO: 'RECUSADO',
+  RECEITA_EMITIDA: 'RECEITA_EMITIDA'
+}
+
+module.exports = {
+  ESTADOS_FLUXO,
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  IS_PRODUCTION: process.env.NODE_ENV === 'production',
+  PORT: process.env.PORT || 3002,
+  BASE_URL: process.env.BASE_URL || 'http://localhost:3002',
+  MEDICO_PASS: process.env.MEDICO_PASS || 'admin123',
+  JWT_SECRET: process.env.JWT_SECRET,
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  MEMED_API_KEY: process.env.MEMED_API_KEY,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  ZAPI_INSTANCE_ID: process.env.ZAPI_INSTANCE_ID,
+  ZAPI_TOKEN: process.env.ZAPI_TOKEN
+}
