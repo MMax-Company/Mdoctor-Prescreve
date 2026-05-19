@@ -29,9 +29,9 @@ app.use(errorHandler)
 
 const PORT = config.PORT
 app.listen(PORT, () => {
-  console.log(\✅ Doctor Prescreve rodando em http://localhost:\\)
-  console.log(\📋 Painel médico: http://localhost:\/painel-medico\)
-  console.log(\🔌 API: http://localhost:\/api\)
+  console.log('[INFO] Doctor Prescreve rodando em http://localhost:' + PORT)
+  console.log('[INFO] Painel medico: http://localhost:' + PORT + '/painel-medico')
+  console.log('[INFO] API: http://localhost:' + PORT + '/api')
 })
 
 module.exports = app

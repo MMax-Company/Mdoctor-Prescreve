@@ -6,7 +6,7 @@ class MemedController {
     try {
       const { medicamento, dosagem, frequencia, paciente_nome, paciente_cpf } = req.body
       if (!medicamento || !paciente_cpf) {
-        return res.status(400).json({ erro: 'Dados obrigatórios faltando' })
+        return res.status(400).json({ erro: 'Dados obrigatorios faltando' })
       }
       const payload = {
         medicamento,
@@ -17,12 +17,13 @@ class MemedController {
         prescritor_nome: config.MEMED_PRESCRITOR_NOME,
         prescritor_board: config.MEMED_PRESCRITOR_BOARD_NUMBER
       }
+      const authHeader = 'Bearer ' + config.MEMED_API_KEY
       const response = await axios.post(
         'https://api.memed.com.br/v1/prescricoes',
         payload,
         {
           headers: {
-            'Authorization': \Bearer \\,
+            'Authorization': authHeader,
             'Content-Type': 'application/json'
           }
         }
@@ -40,14 +41,13 @@ class MemedController {
   async obterStatus(req, res) {
     try {
       const { receitaId } = req.params
-      const response = await axios.get(
-        \https://api.memed.com.br/v1/prescricoes/\\,
-        {
-          headers: {
-            'Authorization': \Bearer \\
-          }
+      const authHeader = 'Bearer ' + config.MEMED_API_KEY
+      const url = 'https://api.memed.com.br/v1/prescricoes/' + receitaId
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': authHeader
         }
-      )
+      })
       res.json(response.data)
     } catch (erro) {
       res.status(500).json({ erro: erro.message })
