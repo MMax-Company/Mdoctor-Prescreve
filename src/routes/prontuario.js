@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const prontuarioController = require('../controllers/prontuarioController')
 const { autenticarMedico } = require('../middlewares/auth')
+const { getProntuario, getProntuarioResumido, getProntuarioPDF, exportProntuario } = require('../controllers/prontuarioController')
 
-router.post('/', autenticarMedico, prontuarioController.criar.bind(prontuarioController))
-router.get('/:triagemId', autenticarMedico, prontuarioController.obter.bind(prontuarioController))
+router.use(autenticarMedico)
+router.get('/prontuario/:id', getProntuario)
+router.get('/prontuario/:id/resumido', getProntuarioResumido)
+router.get('/prontuario/:id/pdf', getProntuarioPDF)
+router.get('/prontuario/:id/export', exportProntuario)
 
 module.exports = router

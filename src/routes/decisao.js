@@ -1,10 +1,19 @@
 const express = require('express')
 const router = express.Router()
-const decisaoController = require('../controllers/decisaoController')
 const { autenticarMedico } = require('../middlewares/auth')
 
-router.post('/aprovar', autenticarMedico, decisaoController.aprovar.bind(decisaoController))
-router.post('/recusar', autenticarMedico, decisaoController.recusar.bind(decisaoController))
-router.get('/:triagemId', autenticarMedico, decisaoController.obterDecisao.bind(decisaoController))
+router.use(autenticarMedico)
+
+router.get('/decisoes/log', (req, res) => {
+  res.json({ decisoes: [] })
+})
+
+router.post('/decisao/:id', (req, res) => {
+  res.json({ success: true })
+})
+
+router.get('/estatisticas/decisoes', (req, res) => {
+  res.json({ total: 0, aprovadas: 0, recusadas: 0 })
+})
 
 module.exports = router

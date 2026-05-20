@@ -1,9 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const memedController = require('../controllers/memedController')
 const { autenticarMedico } = require('../middlewares/auth')
+const { getTokenMemed, getStatusMemed, criarPrescricaoMemed, webhookMemed } = require('../controllers/memedController')
 
-router.post('/enviar', autenticarMedico, memedController.enviarReceita.bind(memedController))
-router.get('/status/:receitaId', autenticarMedico, memedController.obterStatus.bind(memedController))
+router.use(autenticarMedico)
+router.get('/memed/token', getTokenMemed)
+router.get('/memed/status', getStatusMemed)
+router.post('/memed/prescricao', criarPrescricaoMemed)
+router.post('/webhooks/memed', webhookMemed)
 
 module.exports = router
