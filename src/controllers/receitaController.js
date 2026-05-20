@@ -50,6 +50,9 @@ async function criarReceita(req, res) {
       created_at: new Date().toISOString()
     }
     await db.salvarReceita(receita)
+    if (at.status === config.ESTADOS_FLUXO.APROVADO) {
+      await db.atualizarStatus(atendimentoId, config.ESTADOS_FLUXO.RECEITA_EMITIDA)
+    }
     return res.json({
       success: true,
       receita,
@@ -101,6 +104,17 @@ async function gerarPDFReceita(req, res) {
       doc.text('Quantidade: ' + med.quantidade)
       doc.moveDown()
     })
+    if (receita.observacoes) {
+      doc.moveDown()
+      doc.fontSize(11).text('Observacoes')
+      doc.fontSize(10).text(receita.observacoes)
+    }
+    try {
+      const qr = await QRCode.toBuffer(config.BASE_URL + '/api/receita/' + receita.id + '/validar')
+      doc.image(qr, 450, 650, { width: 80 })
+    } catch (e) {
+      console.warn('QRCode:', e.message)
+    }
     doc.end()
   } catch (e) {
     console.error('gerarPDFReceita:', e.message)
@@ -108,21 +122,15 @@ async function gerarPDFReceita(req, res) {
   }
 }
 
-async function validarReceita(req, res) {
+async function emitirReceita(req, res) {
   try {
     const receita = await db.buscarReceitaPorId(req.params.id)
     if (!receita) {
-      return res.status(404).json({ valido: false })
+      return res.status(404).json({ error: 'Receita nao encontrada' })
     }
-    const valida = receita.status === 'ATIVA'
-    return res.json({
-      valido: valida,
-      numero: receita.numero,
-      emissao: receita.data_emissao,
-      validade: receita.data_validade
-    })
+    return res.json({ success: true, pdf_url: config.BASE_URL + '/api/receita/' + receita.id + '/pdf' })
   } catch (e) {
-    return res.status(500).json({ valido: false })
+    return res.status(500).json({ error: 'Erro ao emitir receita' })
   }
 }
 
@@ -150,6 +158,42 @@ async function enviarWhatsAppReceita(req, res) {
   }
 }
 
+async function validarReceita(req, res) {
+  try {
+    const receita = await db.buscarReceitaPorId(req.params.id)
+    if (!receita) {
+      return res.status(404).json({ valido: false })
+    }
+    const valida = receita.status === 'ATIVA'
+    return res.json({
+      valido: valida,
+      numero: receita.numero,
+      emissao: receita.data_emissao,
+      validade: receita.data_validade
+    })
+  } catch (e) {
+    return res.status(500).json({ valido: false })
+  }
+}
+
+async function listarReceitasPaciente(req, res) {
+  try {
+    const receitas = await db.listarReceitasPorAtendimento(req.params.atendimentoId)
+    return res.json({ total: receitas.length, receitas })
+  } catch (e) {
+    return res.status(500).json({ error: 'Erro ao listar receitas' })
+  }
+}
+
+async function cancelarReceita(req, res) {
+  try {
+    await db.atualizarStatusReceita(req.params.id, 'CANCELADA')
+    return res.json({ success: true })
+  } catch (e) {
+    return res.status(500).json({ error: 'Erro ao cancelar receita' })
+  }
+}
+
 async function renovarReceita(req, res) {
   try {
     const receita = await db.buscarReceitaPorId(req.params.id)
@@ -173,7 +217,10 @@ module.exports = {
   criarReceita,
   buscarReceita,
   gerarPDFReceita,
-  validarReceita,
+  emitirReceita,
   enviarWhatsAppReceita,
+  validarReceita,
+  listarReceitasPaciente,
+  cancelarReceita,
   renovarReceita
 }
