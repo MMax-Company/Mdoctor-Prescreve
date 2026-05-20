@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Prescreve - Painel Médico</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f0f2f5; min-height: 100vh; color: #1e293b; font-size: 13px; }
+
+    /* Login */
+    .login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+    .login-card { background: white; border-radius: 24px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    .login-header { text-align: center; margin-bottom: 28px; }
+    .login-icon { width: 70px; height: 70px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .login-icon i { font-size: 32px; color: white; }
+    .login-card h2 { font-size: 22px; font-weight: 700; color: #0f172a; }
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #475569; font-size: 12px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; }
+    .input-group input:focus { outline: none; border-color: #3b82f6; }
+    .login-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+    /* Dashboard */
+    .dashboard-container { display: none; padding: 20px; max-width: 1600px; margin: 0 auto; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 16px 20px; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .logout-btn { background: #fee2e2; color: #ef4444; border: none; padding: 8px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 13px; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; padding: 16px 20px; border-radius: 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .stat-icon { width: 45px; height: 45px; background: #eef2ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    .stat-icon i { font-size: 20px; color: #2563eb; }
+    .stat-info h3 { font-size: 24px; font-weight: 700; }
+    .stat-info p { font-size: 11px; color: #64748b; }
+
+    /* Columns */
+    .columns-container { display: flex; gap: 20px; }
+    .column { flex: 1; background: white; border-radius: 20px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .column-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px; }
+    .column-header h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #475569; }
+    .badge-count { background: #e2e8f0; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+
+    /* Cards */
+    .patient-card { background: #f8fafc; border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+    .patient-card:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .patient-name { font-weight: 700; font-size: 14px; color: #0f172a; }
+    .patient-id { font-size: 10px; color: #64748b; font-family: monospace; margin-top: 2px; }
+    .wait-time { font-size: 10px; color: #f59e0b; background: #fef3c7; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 6px; }
+    
+    /* Status Badges */
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .status-fila { background: #fef3c7; color: #92400e; }
+    .status-fila::before { content: "🟡 "; }
+    .status-atendimento { background: #dbeafe; color: #1e40af; }
+    .status-atendimento::before { content: "🔵 "; }
+    .status-receita-gerada { background: #dcfce7; color: #166534; }
+    .status-receita-gerada::before { content: "🟢 "; }
+    .status-receita-enviada { background: #d1fae5; color: #065f46; }
+    .status-receita-enviada::before { content: "✅ "; }
+    .status-recusado { background: #fee2e2; color: #991b1b; }
+    .status-recusado::before { content: "🔴 "; }
+
+    .info-row { font-size: 11px; color: #475569; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .info-row i { width: 14px; color: #3b82f6; font-size: 10px; }
+    .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .btn { flex: 1; padding: 8px; border: none; border-radius: 10px; font-weight: 600; font-size: 11px; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-warning:hover { background: #d97706; }
+    .btn-outline { background: transparent; border: 1px solid #cbd5e1; color: #475569; }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-sm { padding: 4px 8px; font-size: 10px; }
+
+    /* Drawer Lateral */
+    .drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .drawer { position: fixed; top: 0; right: -500px; width: 500px; max-width: 90%; height: 100%; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1); transition: right 0.3s ease; display: flex; flex-direction: column; z-index: 1001; }
+    .drawer.open { right: 0; }
+    .drawer-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: white; }
+    .drawer-header h3 { font-size: 16px; font-weight: 700; color: #0f172a; }
+    .drawer-close { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 20px; font-size: 12px; }
+    .drawer-body h4 { font-size: 13px; font-weight: 700; margin: 12px 0 8px; color: #0f172a; }
+    .drawer-body p { margin-bottom: 4px; line-height: 1.4; }
+    .info-box { background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 16px; }
+    .info-box p { font-size: 12px; margin-bottom: 4px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 12px; color: #475569; }
+    .form-group textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 12px; resize: vertical; }
+    .drawer-actions { display: flex; gap: 16px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+    .btn-drawer { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; }
+    .btn-recusar-drawer { background: #fee2e2; color: #dc2626; }
+    .btn-recusar-drawer:hover { background: #fecaca; }
+    .btn-aprovar-drawer { background: #dcfce7; color: #16a34a; }
+    .btn-aprovar-drawer:hover { background: #bbf7d0; }
+    .btn-info-drawer { background: #e0e7ff; color: #4338ca; }
+
+    .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
+    .empty-state i { font-size: 32px; margin-bottom: 12px; display: block; }
+
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 12px; font-size: 13px; z-index: 1002; display: none; align-items: center; gap: 8px; }
+    .toast.show { display: flex; animation: fadeInUp 0.3s ease; }
+    .toast.success { background: #10b981; }
+    .toast.error { background: #ef4444; }
+    .toast.warning { background: #f59e0b; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-icon"><i class="fas fa-stethoscope"></i></div>
+      <h2>Doctor Prescreve</h2>
+      <p>Acesso Restrito ao Médico</p>
+    </div>
+    <form id="loginForm">
+      <div class="input-group">
+        <label>Senha de Acesso</label>
+        <input type="password" id="senha" placeholder="Digite sua senha" required>
+      </div>
+      <button type="submit" class="login-btn">Entrar no Painel</button>
+    </form>
+    <div id="erroMsg" style="color: #ef4444; text-align: center; margin-top: 16px; display: none;">Senha incorreta!</div>
+  </div>
+</div>
+
+<div id="dashboard" class="dashboard-container">
+  <div class="top-bar">
+    <div><h1 style="font-size: 18px;">🩺 Painel Médico</h1><p style="font-size: 11px; color: #64748b;">Doctor Prescreve - Gestão Clínica</p></div>
+    <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><h3 id="statFila">0</h3><p>Fila</p></div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-user-md"></i></div><div class="stat-info"><h3 id="statAtendimento">0</h3><p>Atendimento</p></div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-file-prescription"></i></div><div class="stat-info"><h3 id="statReceitaGerada">0</h3><p>Receita Gerada</p></div></div>
+    <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-info"><h3 id="statReceitaEnviada">0</h3><p>WhatsApp</p></div></div>
+  </div>
+
+  <div class="columns-container">
+    <div class="column"><div class="column-header"><h3><i class="fas fa-hourglass-half"></i> FILA DE ESPERA</h3><span class="badge-count" id="countFila">0</span></div><div id="filaColuna"></div></div>
+    <div class="column"><div class="column-header"><h3><i class="fas fa-user-md"></i> EM ATENDIMENTO</h3><span class="badge-count" id="countAtendimento">0</span></div><div id="atendimentoColuna"></div></div>
+    <div class="column"><div class="column-header"><h3><i class="fas fa-file-prescription"></i> DOCUMENTOS DIGITAIS</h3><span class="badge-count" id="countReceita">0</span></div><div id="receitaColuna"></div></div>
+  </div>
+</div>
+
+<!-- Drawer Lateral -->
+<div id="drawerOverlay" class="drawer-overlay"></div>
+<div id="drawer" class="drawer">
+  <div class="drawer-header">
+    <h3><i class="fas fa-file-medical"></i> Prontuário Médico</h3>
+    <button class="drawer-close" id="drawerClose"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="drawerAtendimentoId">
+    <div class="info-box">
+      <p><strong>👤 Nome:</strong> <span id="drawerPacienteNome"></span></p>
+      <p><strong>📱 Telefone:</strong> <span id="drawerPacienteTel"></span></p>
+      <p><strong>🩺 Condição:</strong> <span id="drawerDoenca"></span></p>
+      <p><strong>💊 Medicação:</strong> <span id="drawerMedicacao"></span></p>
+    </div>
+    <h4>📋 Queixa</h4>
+    <p id="drawerQueixa" style="background:#f8fafc;padding:8px;border-radius:8px;margin-bottom:12px;"></p>
+    <h4>📖 História</h4>
+    <p id="drawerHistoria" style="background:#f8fafc;padding:8px;border-radius:8px;margin-bottom:12px;"></p>
+    <h4>🔬 Exame Físico</h4>
+    <p id="drawerExame" style="background:#f8fafc;padding:8px;border-radius:8px;margin-bottom:12px;"></p>
+    <h4>📝 Conduta</h4>
+    <p id="drawerConduta" style="background:#f8fafc;padding:8px;border-radius:8px;margin-bottom:16px;"></p>
+    <div class="form-group">
+      <label><i class="fas fa-comment"></i> Observação (opcional)</label>
+      <textarea id="drawerObservacao" rows="3" placeholder="Digite uma observação..."></textarea>
+    </div>
+    <div class="drawer-actions">
+      <button class="btn-drawer btn-recusar-drawer" id="drawerBtnRecusar">❌ RECUSAR</button>
+      <button class="btn-drawer btn-aprovar-drawer" id="drawerBtnAprovar">✅ APROVAR</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  let token = localStorage.getItem('token');
+  let atendimentosData = [];
+
+  // Toast
+  function showToast(message, type = 'success') {
+    let toast = document.getElementById('toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'toast';
+      toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1e293b;color:white;padding:12px 20px;border-radius:12px;z-index:1002;display:none;';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.className = 'toast ' + type;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+
+  // Login
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const senha = document.getElementById('senha').value;
+    try {
+      const res = await fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ senha }) });
+      const data = await res.json();
+      if (data.token) {
+        token = data.token;
+        localStorage.setItem('token', token);
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        carregarDados();
+        setInterval(carregarDados, 30000);
+      } else {
+        document.getElementById('erroMsg').style.display = 'block';
+      }
+    } catch(e) { document.getElementById('erroMsg').style.display = 'block'; }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    location.reload();
+  });
+
+  // Drawer controls
+  document.getElementById('drawerClose').addEventListener('click', () => {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerOverlay').style.display = 'none';
+  });
+  document.getElementById('drawerOverlay').addEventListener('click', () => {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerOverlay').style.display = 'none';
+  });
+
+  async function carregarDados() {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/atendimentos', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (!res.ok) { if (res.status === 401) logout(); return; }
+      atendimentosData = await res.json();
+      renderizarColunas();
+      atualizarStats();
+    } catch(e) { console.error(e); }
+  }
+
+  function atualizarStats() {
+    const fila = atendimentosData.filter(a => a.status === 'FILA').length;
+    const emAtendimento = atendimentosData.filter(a => a.status === 'EM_ATENDIMENTO').length;
+    const receitaGerada = atendimentosData.filter(a => a.status === 'APROVADO' || a.status === 'RECEITA_EMITIDA').length;
+    const receitaEnviada = atendimentosData.filter(a => a.status === 'RECEITA_EMITIDA').length; 
+    document.getElementById('statFila').innerText = fila;
+    document.getElementById('statAtendimento').innerText = emAtendimento;
+    document.getElementById('statReceitaGerada').innerText = receitaGerada;
+    document.getElementById('statReceitaEnviada').innerText = receitaEnviada;
+  }
+
+  function formatarTempo(data) {
+    if (!data) return 'agora';
+    const diff = Math.floor((new Date() - new Date(data)) / 60000);
+    if (diff < 1) return 'agora';
+    if (diff < 60) return 'há ' + diff + ' min';
+    const horas = Math.floor(diff / 60);
+    if (horas < 24) return 'há ' + horas + 'h';
+    return 'há ' + Math.floor(horas / 24) + 'd';
+  }
+
+  function getStatusBadge(status, whatsappEnviado) {
+    if (status === 'FILA') {
+      return '<span class="status-badge status-fila">EM FILA</span>';
+    }
+    if (status === 'EM_ATENDIMENTO') {
+      return '<span class="status-badge status-atendimento">EM ANÁLISE</span>';
+    }
+    if (status === 'PRONTO_PARA_DECISAO') {
+      return '<span class="status-badge status-atendimento">AGUARDANDO DECISÃO</span>';
+    }
+    if (status === 'APROVADO') {
+      return '<span class="status-badge status-receita-gerada">APROVADO</span>';
+    }
+    if (status === 'RECEITA_EMITIDA') {
+      if (whatsappEnviado) {
+        return '<span class="status-badge status-receita-enviada">RECEITA ENTREGUE</span>';
+      }
+      return '<span class="status-badge status-receita-gerada">RECEITA EMITIDA</span>';
+    }
+    if (status === 'RECUSADO') {
+      return '<span class="status-badge status-recusado">RECUSADO</span>';
+    }
+    return '<span class="status-badge">' + status + '</span>';
+  }
+
+  function gerarQueixa(tipo) {
+    const base = { HAS: "Paciente em acompanhamento por hipertensão arterial sistêmica, solicita renovação de receita.", DIABETES: "Paciente em acompanhamento por diabetes mellitus tipo 2, solicita continuidade do tratamento.", HIPOTIREOIDISMO: "Paciente com hipotireoidismo em tratamento, solicita renovação de medicação.", DISLIPIDEMIA: "Paciente com dislipidemia em tratamento, solicita renovação de medicação.", SAUDE_MENTAL: "Paciente em acompanhamento por transtorno de ansiedade/depressão, solicita renovação.", OUTRO: "Paciente em acompanhamento clínico, solicita renovação de medicação de uso contínuo." };
+    return base[tipo] || base.OUTRO;
+  }
+
+  function gerarHistoria(tipo) {
+    const historias = { HAS: "Paciente refere estabilidade do quadro pressórico. Nega cefaleia, tontura ou palpitações.", DIABETES: "Paciente nega poliúria, polidipsia ou polifagia. Refere seguimento com nutricionista.", HIPOTIREOIDISMO: "Paciente nega ganho ponderal excessivo, astenia ou intolerância ao frio.", DISLIPIDEMIA: "Paciente relata dieta hipolipídica. Nega eventos cardiovasculares prévios.", SAUDE_MENTAL: "Paciente relata melhora do humor e ansiedade com medicação atual.", OUTRO: "Paciente refere-se assintomático ao momento. Sem intercorrências." };
+    return historias[tipo] || historias.OUTRO;
+  }
+
+  function gerarExameFisico(tipo) {
+    const exames = { HAS: "PA: informada pelo paciente como controlada. FC: dentro da normalidade.", DIABETES: "Paciente eutrófico. Sem lesões de pele. Extremidades preservadas.", HIPOTIREOIDISMO: "Tireoide palpável sem nódulos. Sem bócio.", DISLIPIDEMIA: "Paciente sem achados relevantes.", SAUDE_MENTAL: "Paciente lúcido, orientado, sem alterações.", OUTRO: "Consulta remota - exame físico limitado. Sem queixas ativas." };
+    return exames[tipo] || exames.OUTRO;
+  }
+
+  function gerarConduta(tipo) {
+    const condutas = { HAS: "Manter tratamento atual com anti-hipertensivo. Orientado acompanhamento regular.", DIABETES: "Manter hipoglicemiante oral. Reforçar orientação sobre dieta e atividade física.", HIPOTIREOIDISMO: "Manter levotiroxina na dose atual. Solicitar TSH para controle.", DISLIPIDEMIA: "Manter estatina. Reforçar orientação dietética.", SAUDE_MENTAL: "Manter medicação atual. Orientado psicoterapia de suporte.", OUTRO: "Manter tratamento habitual. Orientado retorno em 3 meses." };
+    return condutas[tipo] || condutas.OUTRO;
+  }
+
+  function renderizarColunas() {
+    const fila = atendimentosData.filter(a => a.status === 'FILA');
+    const emAtendimento = atendimentosData.filter(a => a.status === 'EM_ATENDIMENTO');
+    const receita = atendimentosData.filter(a => a.status === 'APROVADO' || a.status === 'RECEITA_EMITIDA' || a.status === 'RECUSADO');
+    
+    document.getElementById('countFila').innerText = fila.length;
+    document.getElementById('countAtendimento').innerText = emAtendimento.length;
+    document.getElementById('countReceita').innerText = receita.length;
+    
+    renderizarColuna('filaColuna', fila, 'fila');
+    renderizarColuna('atendimentoColuna', emAtendimento, 'atendimento');
+    renderizarColuna('receitaColuna', receita, 'receita');
+  }
+
+  function renderizarColuna(elementId, lista, tipo) {
+    const container = document.getElementById(elementId);
+    if (!lista || lista.length === 0) {
+      container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Vazio</p></div>';
+      return;
+    }
+    
+    let html = '';
+    for (let i = 0; i < lista.length; i++) {
+      const a = lista[i];
+      const tempoEspera = formatarTempo(a.criado_em);
+      const statusBadge = getStatusBadge(a.status, a.whatsapp_enviado);
+      
+      html += '<div class="patient-card">';
+      html += '<div class="card-header">';
+      html += '<div>';
+      html += '<div class="patient-name">' + (a.paciente_nome || 'Paciente') + '</div>';
+      html += '<div class="patient-id">ID: ' + (a.id ? a.id.substring(0, 8) : '') + '</div>';
+      if (tipo === 'fila') html += '<div class="wait-time"><i class="fas fa-clock"></i> ' + tempoEspera + '</div>';
+      html += '</div>';
+      html += statusBadge;
+      html += '</div>';
+      
+      html += '<div class="info-row"><i class="fas fa-notes-medical"></i> ' + (a.doencas || 'N/A') + '</div>';
+      html += '<div class="info-row"><i class="fas fa-pills"></i> ' + (a.medicacao_em_uso ? a.medicacao_em_uso.substring(0, 30) : 'N/A') + '</div>';
+      
+      html += '<div class="actions">';
+      if (tipo === 'fila') {
+        html += '<button class="btn btn-warning" onclick="atenderPaciente(\'' + a.id + '\')">ATENDER</button>';
+      } else if (tipo === 'atendimento') {
+        html += '<button class="btn btn-primary" onclick="abrirDrawer(\'' + a.id + '\')">PRONTUÁRIO</button>';
+        html += '<button class="btn btn-primary btn-sm" style="background:#10b981;margin-left:6px;" onclick="emitirReceita(\'' + a.id + '\')">EMITIR RECEITA</button>';
+      } else if (tipo === 'receita') {
+        if (a.status !== 'RECUSADO') {
+          html += '<button class="btn btn-outline btn-sm" onclick="reenviarReceita(\'' + a.id + '\')"><i class="fas fa-redo-alt"></i> REENVIAR</button>';
+          html += '<button class="btn btn-outline btn-sm" onclick="verPDFReceita(\'' + a.id + '\')"><i class="fas fa-file-pdf"></i> PDF</button>';
+        } else {
+          html += '<button class="btn btn-outline btn-sm" onclick="verMotivoRecusa(\'' + a.id + '\')"><i class="fas fa-info-circle"></i> MOTIVO</button>';
+        }
+      }
+      html += '</div>';
+      html += '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  async function atenderPaciente(id) {
+    try {
+      await fetch('/api/atendimento/' + id + '/iniciar', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+      showToast('Paciente movido para atendimento', 'success');
+      carregarDados();
+      abrirDrawer(id);
+    } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+  }
+
+  async function abrirDrawer(id) {
+    try {
+      const res = await fetch('/api/atendimento/' + id, { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tipo = data.tipo || 'OUTRO';
+      
+      document.getElementById('drawerAtendimentoId').value = id;
+      document.getElementById('drawerPacienteNome').innerText = data.paciente_nome || 'Não informado';
+      document.getElementById('drawerPacienteTel').innerText = data.paciente_telefone || 'Não informado';
+      document.getElementById('drawerDoenca').innerText = data.doencas || 'Não informado';
+      document.getElementById('drawerMedicacao').innerText = data.medicacao_em_uso || 'Não informado';
+      document.getElementById('drawerQueixa').innerText = gerarQueixa(tipo);
+      document.getElementById('drawerHistoria').innerText = gerarHistoria(tipo);
+      document.getElementById('drawerExame').innerText = gerarExameFisico(tipo);
+      document.getElementById('drawerConduta').innerText = gerarConduta(tipo);
+      document.getElementById('drawerObservacao').value = '';
+      
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('drawerOverlay').style.display = 'block';
+    } catch(e) {
+      console.error(e);
+      showToast('Erro ao abrir prontuário', 'error');
+    }
+  }
+
+  // Botão APROVAR
+  document.getElementById('drawerBtnAprovar').onclick = async () => {
+    const id = document.getElementById('drawerAtendimentoId').value;
+    const observacao = document.getElementById('drawerObservacao').value;
+    const medicamento = document.getElementById('drawerMedicacao').innerText;
+    
+    showToast('🔄 Gerando receita...', 'warning');
+    
+    try {
+      const res = await fetch('/api/memed/prescricao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ atendimentoId: id, medicamento, observacao })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        document.getElementById('drawer').classList.remove('open');
+        document.getElementById('drawerOverlay').style.display = 'none';
+        carregarDados();
+        showToast('✅ Receita gerada!', 'success');
+        if (data.pdfUrl) window.open(data.pdfUrl, '_blank');
+      } else {
+        showToast('❌ ' + (data.error || 'Erro'), 'error');
+      }
+    } catch(e) {
+      console.error(e);
+      showToast('Erro ao gerar receita', 'error');
+    }
+  };
+
+  // Botão RECUSAR
+  document.getElementById('drawerBtnRecusar').onclick = async () => {
+    const id = document.getElementById('drawerAtendimentoId').value;
+    const observacao = document.getElementById('drawerObservacao').value;
+    const motivo = observacao || 'Não elegível para renovação remota';
+    
+    try {
+      const res = await fetch('/api/decisao/' + id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ decisao: 'RECUSADO', orientacoes: motivo + (observacao ? '\n\nObs: ' + observacao : '') })
+      });
+      if (res.ok) {
+        document.getElementById('drawer').classList.remove('open');
+        document.getElementById('drawerOverlay').style.display = 'none';
+        carregarDados();
+        showToast('❌ Consulta recusada.', 'warning');
+      } else { showToast('Erro ao recusar', 'error'); }
+    } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+  };
+
+  async function reenviarReceita(id) {
+    try {
+      const res = await fetch('/api/receita/' + id + '/enviar-whatsapp', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+      if (res.ok) showToast('✅ Receita reenviada!', 'success');
+      else showToast('Erro ao reenviar', 'error');
+    } catch(e) { showToast('Erro: ' + e.message, 'error'); }
+  }
+
+  async function emitirReceita(id) {
+    try {
+      showToast('🔄 Emitindo receita...', 'warning');
+      const res = await fetch('/api/receita/' + id + '/emitir', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error(data);
+        showToast('Erro ao emitir receita', 'error');
+        return;
+      }
+      if (data && data.receita && data.receita.url) {
+        window.open(data.receita.url, '_blank');
+      } else if (data && data.url) {
+        window.open(data.url, '_blank');
+      } else if (data && data.receita) {
+        // older shape
+        window.open(data.receita.url || ('/api/receita/' + id + '/pdf'), '_blank');
+      } else {
+        window.open('/api/receita/' + id + '/pdf', '_blank');
+      }
+      showToast('✅ Receita emitida', 'success');
+      carregarDados();
+    } catch (e) {
+      console.error(e);
+      showToast('Erro ao emitir receita', 'error');
+    }
+  }
+
+  function verPDFReceita(id) { abrirSignedPdf(id); }
+  
+  function verMotivoRecusa(id) {
+    const at = atendimentosData.find(a => a.id === id);
+    showToast(at?.decisao?.observacao || 'Motivo da recusa não informado', 'warning');
+  }
+
+  // Inicializar Memed
+  async function inicializarMemed() {
+    try {
+      const response = await fetch('/api/memed/token', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await response.json();
+      const script = document.createElement('script');
+      script.src = 'https://cdn.memed.com.br/widget/mdhub.js';
+      script.setAttribute('data-token', data.token);
+      script.onload = async () => {
+        if (typeof MdHub !== 'undefined') {
+          await MdHub.module.waitForReady();
+          console.log('✅ Memed pronta');
+        }
+      };
+      document.body.appendChild(script);
+    } catch (e) { console.error(e); }
+  }
+
+  if (token) { inicializarMemed(); }
+</script>

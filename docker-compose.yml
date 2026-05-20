@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mdoctor-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: EfhslToMHhIMCsnrovArqLARNjHskiHz
+      POSTGRES_DB: mdoctor_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: mdoctor-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:EfhslToMHhIMCsnrovArqLARNjHskiHz@postgres:5432/mdoctor_db
+      DB_TYPE: postgresdb
+      MEDICO_PASS: admin123
+      JWT_SECRET: b4b99bc87d23680e682583c244c04e8d8086d86fde8b44095c8247deb351ea13
+      ENCRYPTION_KEY: 0a9fbb0cc016de17b42f8150d192e489c69696af5a125f276c48e911050e2198
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
