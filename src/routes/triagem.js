@@ -1,10 +1,8 @@
 const express = require('express')
 const router = express.Router()
-const triagemController = require('../controllers/triagemController')
-const { autenticarMedico } = require('../middlewares/auth')
+const { triagem } = require('../controllers/triagemController')
 
-router.post('/', triagemController.criar.bind(triagemController))
-router.get('/', autenticarMedico, triagemController.listar.bind(triagemController))
-router.get('/:id', autenticarMedico, triagemController.obter.bind(triagemController))
+router.post('/webhook/triagem', triagem)
+router.post('/triagem', triagem)
 
 module.exports = router

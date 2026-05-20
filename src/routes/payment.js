@@ -1,10 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const paymentController = require('../controllers/paymentController')
-const { autenticarMedico } = require('../middlewares/auth')
+const { criarPagamento, statusPagamento, webhookStripe } = require('../controllers/paymentController')
 
-router.post('/intencao', paymentController.criarIntencao.bind(paymentController))
-router.post('/confirmar', autenticarMedico, paymentController.confirmarPagamento.bind(paymentController))
-router.get('/status/:paymentIntentId', paymentController.obterStatus.bind(paymentController))
+router.get('/payment/:id', criarPagamento)
+router.get('/payment/status/:id', statusPagamento)
+router.post('/webhook/stripe', express.raw({ type: 'application/json' }), webhookStripe)
 
 module.exports = router
