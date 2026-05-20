@@ -12,12 +12,27 @@ const ESTADOS_FLUXO = {
   RECEITA_EMITIDA: 'RECEITA_EMITIDA'
 }
 
+const requiredEnvVars = [
+  'NODE_ENV',
+  'PORT',
+  'BASE_URL',
+  'JWT_SECRET',
+  'ENCRYPTION_KEY',
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'MEDICO_PASS'
+]
+
 module.exports = {
   ESTADOS_FLUXO,
+  requiredEnvVars,
   NODE_ENV: process.env.NODE_ENV || 'development',
   IS_PRODUCTION: process.env.NODE_ENV === 'production',
   PORT: process.env.PORT || 3002,
   BASE_URL: process.env.BASE_URL || 'http://localhost:3002',
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
+  PUBLIC_DIR: process.env.PUBLIC_DIR || './public',
+  WHATSAPP_MODE: process.env.WHATSAPP_MODE || 'disabled',
   MEDICO_PASS: process.env.MEDICO_PASS || 'admin123',
   JWT_SECRET: process.env.JWT_SECRET,
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
