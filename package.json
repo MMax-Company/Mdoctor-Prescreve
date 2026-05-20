@@ -1,37 +1,20 @@
 {
-  "name": "doctor-prescreve",
-  "version": "4.0.0",
-  "description": "Plataforma inteligente de telemedicina para renovacao de receitas",
-  "main": "src/server.js",
-  "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test:supabase": "node test/test-supabase.js",
-    "test:api": "node test/test-api.js"
-  },
-  "keywords": ["telemedicina", "receita", "doctor"],
-  "author": "Doctor Prescreve",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "helmet": "^7.0.0",
-    "dotenv": "^16.3.1",
-    "jsonwebtoken": "^9.0.2",
-    "joi": "^17.10.2",
-    "uuid": "^9.0.0",
-    "axios": "^1.5.0",
-    "stripe": "^13.0.0",
-    "pdfkit": "^0.13.0",
-    "qrcode": "^1.5.3",
-    "@supabase/supabase-js": "^2.38.0",
-    "express-rate-limit": "^7.0.0",
-    "ws": "^8.14.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
+"name": "mdoctor-backend",
+"version": "1.0.0",
+"main": "src/server.js",
+"scripts": {
+"dev": "node src/server.js",
+"start": "node src/server.js"
+},
+"dependencies": {
+"@supabase/supabase-js": "^2.45.0",
+"axios": "^1.7.2",
+"cors": "^2.8.5",
+"dotenv": "^16.4.5",
+"express": "^4.19.2",
+"helmet": "^7.1.0",
+"jsonwebtoken": "^9.0.2",
+"stripe": "^16.5.0",
+"uuid": "^10.0.0"
+}
 }
